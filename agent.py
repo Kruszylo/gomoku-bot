@@ -23,11 +23,12 @@ class User():
 		self.action_size = action_size
 
 	def act(self, state, tau):
-		action = input('Enter your chosen action: ')
+		action = int(input('Enter your chosen action: '))
 		pi = np.zeros(self.action_size)
+		print(type(action))
 		pi[action] = 1
-		value = None
-		NN_value = None
+		value = -1
+		NN_value = -1
 		return (action, pi, value, NN_value)
 
 

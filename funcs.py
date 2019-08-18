@@ -9,7 +9,7 @@ from model import Residual_CNN
 from agent import Agent, User
 
 import config
-
+import time
 def playMatchesBetweenVersions(env, run_version, player1version, player2version, EPISODES, logger, turns_until_tau0, goes_first = 0):
     
     if player1version == -1:
@@ -38,7 +38,7 @@ def playMatchesBetweenVersions(env, run_version, player1version, player2version,
 
 
 def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = None, goes_first = 0):
-
+    start_episode = time.time()
     env = Game()
     scores = {player1.name:0, "drawn": 0, player2.name:0}
     sp_scores = {'sp':0, "drawn": 0, 'nsp':0}
@@ -46,7 +46,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
 
     for e in range(EPISODES):
 
-        logger.info('====================')
+        logger.info('==========!!========')
         logger.info('EPISODE %d OF %d', e+1, EPISODES)
         logger.info('====================')
 
@@ -76,7 +76,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
             logger.info(player2.name + ' plays as X')
             logger.info('--------------')
 
-        env.gameState.render(logger)
+        # env.gameState.render(logger)
 
         while done == 0:
             turn = turn + 1
@@ -91,18 +91,18 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
                 ####Commit the move to memory
                 memory.commit_stmemory(env.identities, state, pi)
 
-
+            # logger.info('len(stmemory): %s, len(ltmemory): %s', str(len(memory.stmemory)), str(len(memory.ltmemory)))
             logger.info('action: %d', action)
-            for r in range(env.grid_shape[0]):
-                logger.info(['----' if x == 0 else '{0:.2f}'.format(np.round(x,2)) for x in pi[env.grid_shape[1]*r : (env.grid_shape[1]*r + env.grid_shape[1])]])
-            logger.info('MCTS perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(MCTS_value,2))
-            logger.info('NN perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(NN_value,2))
-            logger.info('====================')
+            # for r in range(env.grid_shape[0]):
+            #     logger.info(['----' if x == 0 else '{0:.2f}'.format(np.round(x,2)) for x in pi[env.grid_shape[1]*r : (env.grid_shape[1]*r + env.grid_shape[1])]])
+            # logger.info('MCTS perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(MCTS_value,2))
+            # logger.info('NN perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(NN_value,2))
+            # logger.info('====================')
 
             ### Do the action
             state, value, done, _ = env.step(action) #the value of the newState from the POV of the new playerTurn i.e. -1 if the previous player played a winning move
             
-            env.gameState.render(logger)
+            # env.gameState.render(logger)
 
             if done == 1: 
                 if memory != None:
@@ -117,6 +117,12 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
              
                 if value == 1:
                     logger.info('%s WINS!', players[state.playerTurn]['name'])
+                    end_episode = time.time()
+                    episode_minutes = (end_episode-start_episode)//60
+                    episode_seconds = int( (end_episode-start_episode) - episode_minutes * 60 )
+                    logger.info('EPISODE took %d min %d sec', episode_minutes, episode_seconds)
+
+                    logger.info('len(stmemory): %s, len(ltmemory): %s', str(len(memory.stmemory)), str(len(memory.ltmemory)))
                     scores[players[state.playerTurn]['name']] = scores[players[state.playerTurn]['name']] + 1
                     if state.playerTurn == 1: 
                         sp_scores['sp'] = sp_scores['sp'] + 1

@@ -62,7 +62,7 @@ class MCTS():
 			lg.logger_mcts.info('PLAYER TURN...%d', currentNode.state.playerTurn)
 		
 			maxQU = -99999
-
+			simulationAction, simulationEdge = currentNode.edges[ np.random.choice(len(currentNode.edges)) ] #TODO: i'm not sure about this but we need some initialization :\
 			if currentNode == self.root:
 				epsilon = config.EPSILON
 				nu = np.random.dirichlet([config.ALPHA] * len(currentNode.edges))
